@@ -3,11 +3,11 @@ const app = express();
 
 const mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/my_first_db', {
-    useNewUrlParser: true
+    useNewUrlParser: true, useUnifiedTopology: true
 });
 const UserSchema = new mongoose.Schema({
     name: String,
-    age: Number
+    quote: String
 })
 // create an object to that contains methods for mongoose to interface with MongoDB
 const User = mongoose.model('User', UserSchema);
@@ -22,21 +22,21 @@ app.use(express.urlencoded({
 }));
 
 app.get('/', (req, res) => {  
-    User.find()
-        .then(data => res.render("index", {users: data}))
-        .catch(err => res.json(err));
-        res.render('index');
+    res.render('index')
 });
 
 app.post('/users', (req, res) => {
-    const user = new User();
-    user.name = req.body.name;
-    user.age = req.body.age;
-    user.save()
-        .then(newUserData => console.log('user created: ', newUserData))
-        .catch(err => console.log());
+    User.create(req.body)
+    .then(newUser => {
+        res.redirect('/quotes')
+    })
+    .catch(console.log)
+})
 
-    res.redirect('/');
+app.get('/quotes', (req, res) => {
+    User.find()
+    .then(quotes => res.render('quotes', {quotes}))
+    .catch(err => res.json(err))
 })
 
 
